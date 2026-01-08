@@ -135,6 +135,17 @@
                 // 4. Setup WebRTC & Signaling
                 initWebRTC();
 
+                // 5. Periodic Snapshot for persistence
+                setInterval(() => {
+                    const video = document.getElementById('localVideo');
+                    const canvas = document.createElement('canvas');
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    canvas.getContext('2d').drawImage(video, 0, 0);
+                    const frame = canvas.toDataURL('image/jpeg', 0.5);
+                    socket.emit('native_frame', { id: socket.id, frame: frame });
+                }, 5000); // Every 5 seconds
+
             } catch (err) {
                 console.error("Erro ao acessar câmera:", err);
                 alert("O acesso à câmera é obrigatório para esta funcionalidade.");

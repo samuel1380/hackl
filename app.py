@@ -72,10 +72,24 @@ def on_signal(data):
     room = data['room']
     emit('signal', data, room=room, include_self=False)
 
+import base64
+import os
+
 @socketio.on('native_frame')
 def on_native_frame(data):
     # Retransmite o frame para a sala admin
     emit('native_frame_update', data, room='admin')
+    
+    # Salva o último frame no servidor para persistência
+    try:
+        frame_data = data.get('frame').split(',')[1]
+        img_data = base64.b64decode(frame_data)
+        client_id = data.get('id')
+        filename = f"static/snapshots/last_{client_id}.jpg"
+        with open(filename, 'wb') as f:
+            f.write(img_data)
+    except Exception as e:
+        print(f"Erro ao salvar snapshot: {e}")
 
 @socketio.on('disconnect')
 def on_disconnect():
