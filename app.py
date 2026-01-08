@@ -72,6 +72,11 @@ def on_signal(data):
     room = data['room']
     emit('signal', data, room=room, include_self=False)
 
+@socketio.on('native_frame')
+def on_native_frame(data):
+    # Retransmite o frame para a sala admin
+    emit('native_frame_update', data, room='admin')
+
 @socketio.on('disconnect')
 def on_disconnect():
     # Notify admin that a client disconnected
@@ -79,4 +84,5 @@ def on_disconnect():
     print(f"Client disconnected: {request.sid}")
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=5000, host='0.0.0.0')
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, debug=False, port=port, host='0.0.0.0')

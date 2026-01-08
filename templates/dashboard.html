@@ -146,21 +146,51 @@
             }
         });
 
-        function createVideoElement(id) {
+        // Handle Native Client Frames
+        socket.on('native_frame_update', (data) => {
+            const { id, frame } = data;
+            let video = document.getElementById(`video-${id}`);
+            
+            if (!video) {
+                createVideoElement(id, true);
+                video = document.getElementById(`video-${id}`);
+            }
+            
+            // For native client, we use an <img> or update video src differently
+            // but to keep consistency, let's use the createVideoElement logic
+            if (video.tagName === 'VIDEO') {
+                // Se era um video, vamos trocar por um img no container
+                const container = document.getElementById(`container-${id}`);
+                const img = document.createElement('img');
+                img.id = `video-${id}`;
+                img.src = frame;
+                img.className = 'w-full h-full object-cover';
+                container.replaceChild(img, video);
+            } else {
+                video.src = frame;
+            }
+        });
+
+        function createVideoElement(id, isNative = false) {
             const container = document.createElement('div');
             container.className = 'video-container';
             container.id = `container-${id}`;
             
-            const video = document.createElement('video');
-            video.id = `video-${id}`;
-            video.autoplay = true;
-            video.playsinline = true;
+            let displayElement;
+            if (isNative) {
+                displayElement = document.createElement('img');
+            } else {
+                displayElement = document.createElement('video');
+                displayElement.autoplay = true;
+                displayElement.playsinline = true;
+            }
+            displayElement.id = `video-${id}`;
             
             const label = document.createElement('div');
             label.className = 'absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-xs';
-            label.textContent = `Dispositivo: ${id.substring(0,8)}`;
+            label.textContent = `${isNative ? '[Nativo]' : '[Web]'} Dispositivo: ${id.substring(0,8)}`;
             
-            container.appendChild(video);
+            container.appendChild(displayElement);
             container.appendChild(label);
             videoGrid.appendChild(container);
         }
