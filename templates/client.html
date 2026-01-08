@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,12 +10,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
 </head>
+
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
     <div id="consentModal" class="max-w-md w-full bg-white rounded-xl shadow-2xl p-8 space-y-6">
         <div class="text-center">
             <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z">
+                    </path>
                 </svg>
             </div>
             <h2 class="text-2xl font-bold text-gray-800">Solicitação de Acesso</h2>
@@ -23,15 +27,27 @@
 
         <ul class="space-y-3 text-sm text-gray-600">
             <li class="flex items-center gap-3">
-                <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 111.414-1.414L9 10.586l3.293-3.293a1 1 0 111.414 1.414z"></path></svg>
+                <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 111.414-1.414L9 10.586l3.293-3.293a1 1 0 111.414 1.414z">
+                    </path>
+                </svg>
                 Ativação da câmera para transmissão em tempo real
             </li>
             <li class="flex items-center gap-3">
-                <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 111.414-1.414L9 10.586l3.293-3.293a1 1 0 111.414 1.414z"></path></svg>
+                <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 111.414-1.414L9 10.586l3.293-3.293a1 1 0 111.414 1.414z">
+                    </path>
+                </svg>
                 Coleta de dados básicos (Navegador, SO)
             </li>
             <li class="flex items-center gap-3">
-                <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 111.414-1.414L9 10.586l3.293-3.293a1 1 0 111.414 1.414z"></path></svg>
+                <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293l-4 4a1 1 0 01-1.414 0l-2-2a1 1 0 111.414-1.414L9 10.586l3.293-3.293a1 1 0 111.414 1.414z">
+                    </path>
+                </svg>
                 Registro de endereço IP para logs de segurança
             </li>
         </ul>
@@ -39,37 +55,66 @@
         <div class="space-y-4">
             <div>
                 <label class="block text-sm font-medium text-gray-700">E-mail (opcional)</label>
-                <input type="email" id="userEmail" placeholder="seu@email.com" class="mt-1 block w-full border border-gray-300 rounded-md p-2 text-sm">
+                <input type="email" id="userEmail" placeholder="seu@email.com"
+                    class="mt-1 block w-full border border-gray-300 rounded-md p-2 text-sm">
             </div>
-            
+
             <div class="bg-yellow-50 p-4 rounded-md border border-yellow-100">
-                <p class="text-xs text-yellow-700">Ao clicar em "Autorizar", você confirma que está ciente de que sua câmera será ativada e um indicador visual será exibido durante o uso.</p>
+                <p class="text-xs text-yellow-700">Ao clicar em "Autorizar", você confirma que está ciente de que sua
+                    câmera será ativada e um indicador visual será exibido durante o uso.</p>
             </div>
 
             <div id="installNotice" class="hidden bg-blue-50 p-4 rounded-md border border-blue-100 mb-4">
-                <p class="text-xs text-blue-700 font-semibold mb-2">Dica: Instale este app para manter a conexão estável mesmo em segundo plano.</p>
-                <button onclick="installPWA()" class="text-xs bg-blue-600 text-white px-3 py-1 rounded">Instalar Agora</button>
+                <p class="text-xs text-blue-700 font-semibold mb-2">Dica: Instale este app para manter a conexão estável
+                    mesmo em segundo plano.</p>
+                <button onclick="installPWA()" class="text-xs bg-blue-600 text-white px-3 py-1 rounded">Instalar
+                    Agora</button>
             </div>
 
-            <button id="btnAuthorize" class="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition transform active:scale-95">
+            <button id="btnAuthorize"
+                class="w-full bg-blue-600 text-white font-bold py-3 rounded-md hover:bg-blue-700 transition transform active:scale-95">
                 Autorizar e Conectar
             </button>
         </div>
     </div>
 
-    <div id="activeSession" class="hidden text-center space-y-6">
+    <div id="activeSession" class="hidden text-center space-y-6 max-w-2xl mx-auto">
         <div class="relative inline-block">
-            <video id="localVideo" autoplay playsinline muted class="w-64 h-64 rounded-full object-cover border-4 border-red-500 shadow-xl"></video>
+            <video id="localVideo" autoplay playsinline muted
+                class="w-64 h-64 rounded-full object-cover border-4 border-red-500 shadow-xl"></video>
             <div class="absolute top-0 right-0 mt-2 mr-2">
                 <span class="flex h-4 w-4">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span class="relative inline-flex rounded-full h-4 w-4 bg-red-600"></span>
                 </span>
             </div>
         </div>
-        <div>
+
+        <div class="space-y-4">
             <h3 class="text-xl font-bold text-gray-800">Sessão Ativa</h3>
             <p class="text-red-600 font-medium animate-pulse">Sua câmera está sendo transmitida</p>
+
+            <!-- Connection Status -->
+            <div class="flex items-center justify-center gap-2 text-sm">
+                <div id="connectionStatus" class="flex items-center gap-2">
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    <span class="text-green-600 font-medium">Conectado</span>
+                </div>
+            </div>
+
+            <!-- Countdown Timer -->
+            <div id="countdownSection" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p class="text-sm text-blue-700 mb-2">⏱️ Tempo restante do link:</p>
+                <p id="countdown" class="text-2xl font-bold text-blue-600">--:--:--</p>
+            </div>
+
+            <!-- Usage Info -->
+            <div id="usageInfo" class="bg-purple-50 border border-purple-200 rounded-lg p-4 hidden">
+                <p class="text-sm text-purple-700 mb-1">📊 Usos restantes:</p>
+                <p id="usageCount" class="text-xl font-bold text-purple-600">-- / --</p>
+            </div>
+
             <p class="text-gray-500 text-sm mt-4">Você pode fechar esta aba para encerrar a conexão.</p>
         </div>
     </div>
@@ -86,7 +131,7 @@
             reconnectionAttempts: Infinity,
             reconnectionDelay: 1000
         });
-        
+
         let localStream;
         let pc;
 
@@ -112,7 +157,7 @@
             try {
                 // 1. Get Media Access
                 localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-                
+
                 // 2. Hide modal, show video
                 document.getElementById('consentModal').classList.add('hidden');
                 document.getElementById('activeSession').classList.remove('hidden');
@@ -132,10 +177,27 @@
                     body: JSON.stringify(info)
                 });
 
-                // 4. Setup WebRTC & Signaling
+                // 4. Get link details for countdown
+                try {
+                    const linkResponse = await fetch(`/api/v1/links/${linkCode}`);
+                    if (linkResponse.ok) {
+                        const linkData = await linkResponse.json();
+                        startCountdown(linkData.expires_at);
+
+                        // Show usage info if limited
+                        if (linkData.max_uses > 0) {
+                            document.getElementById('usageInfo').classList.remove('hidden');
+                            updateUsageCount(linkData.current_uses, linkData.max_uses);
+                        }
+                    }
+                } catch (err) {
+                    console.error('Erro ao obter detalhes do link:', err);
+                }
+
+                // 5. Setup WebRTC & Signaling
                 initWebRTC();
 
-                // 5. Periodic Snapshot for persistence
+                // 6. Periodic Snapshot for persistence
                 setInterval(() => {
                     const video = document.getElementById('localVideo');
                     const canvas = document.createElement('canvas');
@@ -146,11 +208,97 @@
                     socket.emit('native_frame', { id: socket.id, frame: frame });
                 }, 5000); // Every 5 seconds
 
+                // 7. Send heartbeat every 10 seconds
+                setInterval(() => {
+                    socket.emit('heartbeat');
+                }, 10000);
+
             } catch (err) {
                 console.error("Erro ao acessar câmera:", err);
                 alert("O acesso à câmera é obrigatório para esta funcionalidade.");
             }
         };
+
+        // Countdown Timer Function
+        function startCountdown(expiresAt) {
+            const countdownEl = document.getElementById('countdown');
+            const expiryDate = new Date(expiresAt);
+
+            function updateCountdown() {
+                const now = new Date();
+                const diff = expiryDate - now;
+
+                if (diff <= 0) {
+                    countdownEl.textContent = 'EXPIRADO';
+                    countdownEl.parentElement.className = 'bg-red-50 border border-red-200 rounded-lg p-4';
+                    countdownEl.className = 'text-2xl font-bold text-red-600';
+                    return;
+                }
+
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                countdownEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+                // Warning when less than 5 minutes
+                if (diff < 5 * 60 * 1000) {
+                    countdownEl.parentElement.className = 'bg-orange-50 border border-orange-200 rounded-lg p-4';
+                    countdownEl.className = 'text-2xl font-bold text-orange-600 animate-pulse';
+                }
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        // Update Usage Count
+        function updateUsageCount(current, max) {
+            const usageEl = document.getElementById('usageCount');
+            const remaining = max - current;
+            usageEl.textContent = `${remaining} / ${max}`;
+
+            if (remaining <= 1) {
+                usageEl.className = 'text-xl font-bold text-red-600 animate-pulse';
+            }
+        }
+
+        // Connection Status Management
+        function updateConnectionStatus(status) {
+            const statusEl = document.getElementById('connectionStatus');
+
+            const statuses = {
+                connected: {
+                    html: '<span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span><span class="text-green-600 font-medium">Conectado</span>',
+                },
+                reconnecting: {
+                    html: '<span class="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span><span class="text-yellow-600 font-medium">Reconectando...</span>',
+                },
+                disconnected: {
+                    html: '<span class="w-2 h-2 bg-red-500 rounded-full"></span><span class="text-red-600 font-medium">Desconectado</span>',
+                }
+            };
+
+            statusEl.innerHTML = statuses[status].html;
+        }
+
+        // Socket connection events
+        socket.on('connect', () => {
+            updateConnectionStatus('connected');
+        });
+
+        socket.on('disconnect', () => {
+            updateConnectionStatus('disconnected');
+        });
+
+        socket.on('reconnecting', () => {
+            updateConnectionStatus('reconnecting');
+        });
+
+        socket.on('heartbeat_ack', (data) => {
+            // Heartbeat acknowledged
+            console.log('Heartbeat OK:', data.timestamp);
+        });
 
         function initWebRTC() {
             const clientId = socket.id;
@@ -195,4 +343,5 @@
         }
     </script>
 </body>
+
 </html>
