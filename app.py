@@ -97,6 +97,16 @@ def on_disconnect():
     emit('client_disconnected', {'id': request.sid}, room='admin')
     print(f"Client disconnected: {request.sid}")
 
+@socketio.on('native_frame')
+def handle_native_frame(data):
+    # Repassa o frame da câmera para o dashboard
+    emit('native_stream', data, broadcast=True)
+
+@socketio.on('native_screen')
+def handle_native_screen(data):
+    # Repassa o frame da tela para o dashboard
+    emit('native_screen_stream', data, broadcast=True)
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     socketio.run(app, debug=False, port=port, host='0.0.0.0')
